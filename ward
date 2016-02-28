@@ -1,0 +1,56 @@
+precision highp float; //set default precision in glsl es 2.0
+
+struct lightInfo
+{
+    vec3 lightColor;
+    vec3 direction;
+};
+
+uniform lightInfo light;
+
+varying vec3 varNormal;
+varying vec3 varEyeDir;
+varying vec3 varTangent;
+varying vec3 varBitangent;
+
+void main()
+{
+    // set value depending on material (for more control, set from the outside instead)
+    float pD = 0.3;
+    float pS = 0.8;
+    float alphaX = 0.5;
+    float alphaY = 0.13;
+    
+    const float PI = 3.14159;
+
+    // renormalize
+    vec3 normal = normalize(varNormal);
+    vec3 eyeDir = normalize(varEyeDir);
+    vec3 tangent = normalize(varTangent);
+    vec3 bitangent = normalize(varBitangent);
+
+    // calculate N dot L
+    float NdotL = dot(normal, light.direction);
+
+    float diffuse = pD * max(NdotL, 0.0);
+    
+    float specular = 0.0;
+    if(NdotL > 0.0)
+    {
+        // calculate intermediary values
+        vec3 halfwayVector = normalize(light.direction + eyeDir);
+        float NdotV = dot(normal, eyeDir);
+        float HdotN = dot(halfwayVector, normal);
+        float VdotN = dot(eyeDir, normal);
+        float HdotTAlphaX = dot(halfwayVector, tangent) / alphaX;
+        float HdotBAlphaY = dot(halfwayVector, bitangent) / alphaY;
+        
+        // calculate the specular value
+        float exponent = exp(-2.0 * (HdotTAlphaX * HdotTAlphaX + HdotBAlphaY * HdotBAlphaY) / (1.0 + HdotN));
+        specular = pS * sqrt(max(0.0, NdotL / NdotV)) * exponent;
+    }
+    
+    vec3 finalValue = light.lightColor * (diffuse + specular);
+    
+    gl_FragColor = vec4(finalValue, 1.0);
+}
