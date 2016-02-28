@@ -1,0 +1,10 @@
+//Matrix uniforms go here
+//...
+
+varying vec3 wcNormal;
+
+void main() {
+  //we will use skybox position as it's normal
+  wcNormal = aPosition.xyz;
+  gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aPosition;
+}
