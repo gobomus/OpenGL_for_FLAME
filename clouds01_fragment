@@ -1,0 +1,54 @@
+precision highp float;
+precision highp int;
+
+
+#define MAX_DIR_LIGHTS 0
+#define MAX_POINT_LIGHTS 0
+#define MAX_SPOT_LIGHTS 0
+#define MAX_HEMI_LIGHTS 0
+#define MAX_SHADOWS 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform mat4 viewMatrix;
+uniform vec3 cameraPosition;
+uniform sampler2D tDiffuse;
+uniform sampler2D tNoise;
+uniform float uTime;
+varying vec2 vUv;
+vec3 Wheel(float wheelPos)
+{
+	float r = abs(tan(wheelPos + .025));
+	float g = abs(tan(wheelPos - .05));
+	float b = abs(tan(wheelPos - .1));
+  return( vec3( r, g, b ) );
+}
+void main() {
+float phase = abs( sin( uTime * .0001 ) );
+float wipe = sin(uTime * .000025);
+vec4 tex = texture2D( tNoise, vec2(vUv.x + (uTime * .000025), vUv.y * ( sin(uTime * .0001) * .25 + .75) ));
+vec4 tex2 = texture2D( tNoise, vec2(vUv.x - (tex.r * .2), vUv.y - (tex.r * .3) ) );
+gl_FragColor = vec4(Wheel( ( (tex.r * sin(tex2.r) * 2.5) ) * .55 ), 1.);
+}
